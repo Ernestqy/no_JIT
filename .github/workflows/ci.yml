@@ -33,6 +33,8 @@ jobs:
           set -eux
           # install foundryup
           curl -L https://foundry.paradigm.xyz | bash -s -- -y
+          # source bashrc to make foundryup available in PATH
+          source $HOME/.bashrc
           # install foundry toolchain (forge, cast, etc.) non-interactively
           foundryup -y
           echo "$HOME/.foundry/bin" >> $GITHUB_PATH
