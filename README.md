@@ -70,3 +70,9 @@ We welcome contributions from the community! Whether it's a bug report, a featur
 ## 📄 License
 
 This project is licensed under the **Apache 2.0 License**. See the [LICENSE](./LICENSE) file for details.
+
+
+---
+<p align="center">
+  Designed with ❤️ for the DeFi Community
+</p>
