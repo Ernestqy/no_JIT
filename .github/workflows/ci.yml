@@ -28,10 +28,11 @@ jobs:
     needs: slither
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Foundry
-        uses: foundry-rs/setup-foundry@v1
-        with:
-          version: latest
+      - name: Install Foundry (foundryup)
+        run: |
+          curl -L https://foundry.paradigm.xyz | bash
+      - name: Add Foundry to PATH
+        run: echo "$HOME/.foundry/bin" >> $GITHUB_PATH
       - name: Install Python deps (for other tooling)
         run: python -m pip install -r requirements.txt || true
       - name: Run forge tests
