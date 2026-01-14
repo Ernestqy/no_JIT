@@ -1,5 +1,8 @@
+import os
 import yaml
 import time
+import logging
+from datetime import datetime
 from web3 import Web3
 from scipy.optimize import minimize_scalar
 
@@ -16,12 +19,28 @@ class ProductionHJISolver:
     def __init__(self, config_path):
         with open(config_path, 'r') as f:
             self.cfg = yaml.safe_load(f)
-        
+        # logging
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+        self.log = logging.getLogger("ProductionHJISolver")
+
+        # Web3 setup
         self.w3 = Web3(Web3.HTTPProvider(self.cfg['network']['rpc_url']))
         self.pm = self.w3.eth.contract(address=self.cfg['contracts']['pool_manager'], abi=POOL_MANAGER_ABI)
         self.hook = self.w3.eth.contract(address=self.cfg['contracts']['hook_address'], abi=HOOK_ABI)
         self.pool_id = self.cfg['contracts']['pool_id']
-        self.acct = self.w3.eth.account.from_key(self.cfg['network']['governor_private_key'])
+
+        # Private key must be provided via environment variable for safety
+        priv_env = self.cfg.get('network', {}).get('private_key_env', 'GOV_PRIVATE_KEY')
+        priv = os.environ.get(priv_env)
+        if not priv:
+            raise RuntimeError(f"Private key environment variable '{priv_env}' not set")
+        self.acct = self.w3.eth.account.from_key(priv)
+
+        # client runtime parameters
+        self.poll_interval = float(self.cfg.get('runtime', {}).get('poll_interval_seconds', 60))
+        self.rate_limit_seconds = float(self.cfg.get('runtime', {}).get('min_seconds_between_txs', 30))
+        self.max_retries = int(self.cfg.get('runtime', {}).get('max_tx_retries', 5))
+        self.last_tx_time = 0.0
 
     def get_realtime_state(self):
         liquidity = self.pm.functions.getLiquidity(self.pool_id).call()
@@ -40,7 +59,7 @@ class ProductionHJISolver:
                 method='bounded'
             )
             return -res.fun
-        low, high = 0.0005, 0.1 # 5bps to 1000bps
+        low, high = 0.0005, 0.1 # 5bps to 10000bps
         for _ in range(20):
             mid = (low + high) / 2
             if max_profit_for_phi(mid) > 0: low = mid
@@ -59,6 +78,13 @@ class ProductionHJISolver:
                 "feePips": int(phi * 1_000_000)
             })
         
+        # Rate limiting: ensure minimum interval between on-chain updates
+        now = time.time()
+        since_last = now - self.last_tx_time
+        if since_last < self.rate_limit_seconds:
+            self.log.info("Skipping on-chain update due to rate limit (%.1fs remaining)", self.rate_limit_seconds - since_last)
+            return
+
         tx = self.hook.functions.setFeeTiers(tiers_payload).build_transaction({
             'from': self.acct.address,
             'nonce': self.w3.eth.get_transaction_count(self.acct.address),
@@ -66,9 +92,30 @@ class ProductionHJISolver:
             'maxFeePerGas': int(gp * 1.2),
             'maxPriorityFeePerGas': self.w3.eth.max_priority_fee
         })
-        signed_tx = self.w3.eth.account.sign_transaction(tx, self.acct.key)
-        tx_hash = self.w3.eth.send_raw_transaction(signed_tx.rawTransaction)
-        print(f"Strategy updated. L_active: {L}, Tick: {tick}, Tx: {tx_hash.hex()}")
+
+        # Exponential backoff retry loop for sending transaction
+        attempt = 0
+        while attempt < self.max_retries:
+            try:
+                signed_tx = self.w3.eth.account.sign_transaction(tx, self.acct.key)
+                raw = signed_tx.rawTransaction
+                tx_hash = self.w3.eth.send_raw_transaction(raw)
+                self.last_tx_time = time.time()
+                self.log.info("Strategy updated. L_active: %s, Tick: %s, Tx: %s", L, tick, tx_hash.hex())
+                break
+            except Exception as e:
+                attempt += 1
+                backoff = min(60, (2 ** attempt))
+                # log full context for debugging
+                self.log.error("Tx attempt %d failed: %s; backoff %ds; payload snapshot: %s", attempt, str(e), backoff, {
+                    'L_active': L,
+                    'tick': tick,
+                    'tiers_count': len(tiers_payload),
+                })
+                if attempt >= self.max_retries:
+                    self.log.exception("Max retries reached, aborting tx")
+                    raise
+                time.sleep(backoff)
 
 if __name__ == "__main__":
     solver = ProductionHJISolver("config.yaml")
@@ -76,5 +123,5 @@ if __name__ == "__main__":
         try:
             solver.sync_to_chain()
         except Exception as e:
-            print(f"Error: {e}")
-        time.sleep(60)
+            solver.log.exception("Error in sync loop: %s", str(e))
+        time.sleep(solver.poll_interval)

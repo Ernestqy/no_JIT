@@ -27,17 +27,35 @@ contract ProductionJITHook is BaseHook {
     mapping(PoolId => BlockAudit) public poolAudits;
     FeeTier[] public feeTiers; 
     address public immutable governor;
+    uint256 public constant MAX_TIERS = 16;
+    uint24 public constant MAX_FEEPIPS = 1_000_000; // corresponds to phi * 1_000_000
+
+    event FeeTiersUpdated(uint256 length, address indexed governor);
 
     constructor(IPoolManager _poolManager, address _governor) BaseHook(_poolManager) {
+        require(_governor != address(0), "ZeroGovernor");
+        // require governor to be a contract (prefer multisig/timelock)
+        require(address(_governor).code.length > 0, "GovernorNotContract");
         governor = _governor;
     }
 
     function setFeeTiers(FeeTier[] calldata _newTiers) external {
         require(msg.sender == governor, "Auth");
+        require(_newTiers.length <= MAX_TIERS, "TooManyTiers");
+        // basic validation and ensure thresholds are strictly increasing
+        uint128 lastThreshold = 0;
+        for (uint256 i = 0; i < _newTiers.length; i++) {
+            require(_newTiers[i].thresholdRatioBps > 0, "ZeroThreshold");
+            require(_newTiers[i].feePips <= MAX_FEEPIPS, "FeeTooLarge");
+            require(_newTiers[i].thresholdRatioBps > lastThreshold, "NonIncreasingThresholds");
+            lastThreshold = _newTiers[i].thresholdRatioBps;
+        }
+
         delete feeTiers;
         for (uint256 i = 0; i < _newTiers.length; i++) {
             feeTiers.push(_newTiers[i]);
         }
+        emit FeeTiersUpdated(feeTiers.length, governor);
     }
 
     function getHookPermissions() public pure override returns (Hooks.Permissions memory) {
@@ -70,7 +88,6 @@ contract ProductionJITHook is BaseHook {
         PoolId poolId = key.toId();
         (, int24 currentTick, , ) = poolManager.getSlot0(poolId);
 
-        // 严谨逻辑：JIT 必须在当前活跃 Tick 注入
         if (params.tickLower <= currentTick && params.tickUpper >= currentTick) {
             BlockAudit storage audit = poolAudits[poolId];
             if (audit.lastBlock != block.number) {
