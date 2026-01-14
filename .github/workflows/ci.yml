@@ -33,14 +33,12 @@ jobs:
           set -eux
           # install foundryup
           curl -L https://foundry.paradigm.xyz | bash -s -- -y
-          # source bashrc to make foundryup available in PATH
-          source $HOME/.bashrc
-          # install foundry toolchain (forge, cast, etc.) non-interactively
-          foundryup -y
+          # install foundry toolchain (forge, cast, etc.) using full path
+          $HOME/.foundry/bin/foundryup -y
           echo "$HOME/.foundry/bin" >> $GITHUB_PATH
           export PATH="$HOME/.foundry/bin:$PATH"
           # verify installation
-          forge --version
+          $HOME/.foundry/bin/forge --version
       - name: Install Python deps (for other tooling)
         run: python -m pip install -r requirements.txt || true
       - name: Run forge tests
