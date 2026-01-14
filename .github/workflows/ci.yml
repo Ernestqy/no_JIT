@@ -31,7 +31,10 @@ jobs:
       - name: Install Foundry (foundryup) and verify
         run: |
           set -eux
+          # install foundryup
           curl -L https://foundry.paradigm.xyz | bash -s -- -y
+          # install foundry toolchain (forge, cast, etc.) non-interactively
+          foundryup -y
           echo "$HOME/.foundry/bin" >> $GITHUB_PATH
           export PATH="$HOME/.foundry/bin:$PATH"
           # verify installation
