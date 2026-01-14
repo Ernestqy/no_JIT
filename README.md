@@ -21,7 +21,7 @@
 
 **`no_JIT`** is not just another MEV mitigation tool; it's an academically-grounded defense mechanism that transforms passive Liquidity Providers into strategic, active defenders. By implementing the Nash Equilibrium strategy derived from our **Hamilton-Jacobi-Isaacs (HJI) framework**, this Uniswap v4 Hook makes JIT attacks economically non-viable, ex-ante.
 
-> **Read the full academic paper:** [*Defense in Predatory Markets: A Differential Game Framework...*](https://link-to-your-paper.pdf)
+> **Read the full academic paper:** [*Defense in Predatory Markets: A Differential Game Framework...*](paper/paper.pdf)
 
 ## 🚀 Key Innovations
 
