@@ -1,4 +1,5 @@
 <div align="center">
+  <img src="./assets/banner.png" alt="no_JIT Banner" width="800"/>
   <h1>no_JIT: A Game-Theoretic Defense for Uniswap v4 LPs</h1>
   
   <p>
